@@ -1,13 +1,35 @@
 [
   {
     "name": "week",
-    "title": "This week",
-    "subtitle": "On-call Coverage for Claude Code: what needs attention, rendered by npm run view",
+    "title": "Weekly on-call readiness",
     "sections": [
       {
-        "title": "Needs attention",
-        "note": "TODO(author): point this at the industry's attention view (overdue, stuck, quiet).",
-        "sql": "select 'replace me' as item, 'TODO(author)' as why"
+        "title": "Policies and assignments",
+        "sql": "select * from v_week order by code"
+      },
+      {
+        "title": "Attention",
+        "sql": "select * from v_attention order by reason,code"
+      }
+    ]
+  },
+  {
+    "name": "roster",
+    "title": "Assigned duty in UTC",
+    "sections": [
+      {
+        "title": "Assignments",
+        "sql": "select policy,responder,level,starts_at,ends_at,verified from v_roster order by starts_at,policy"
+      }
+    ]
+  },
+  {
+    "name": "handover",
+    "title": "Open handovers",
+    "sections": [
+      {
+        "title": "Open handovers",
+        "sql": "select code,name,owner,due_at,evidence from handovers where status='open' order by due_at"
       }
     ]
   }

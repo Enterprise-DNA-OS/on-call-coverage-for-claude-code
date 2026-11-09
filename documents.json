@@ -1,11 +1,36 @@
 [
   {
-    "name": "example",
-    "title": "TODO(author): the first document this industry must produce",
-    "for_each": "select gen_random_uuid() as id, 'Example' as name",
+    "name": "duty-plan",
+    "title": "On-call duty plan",
+    "for_each": "select id,name from policies order by code",
     "file": "name",
     "sections": [
-      { "title": "Details", "sql": "select 'replace me' as item, $1::text as record_id" }
+      {
+        "title": "Policy owner and review",
+        "sql": "select code,name,owner,levels,review_due from policies where id=$1",
+        "layout": "record"
+      },
+      {
+        "title": "Assigned duty, UTC",
+        "sql": "select r.name responder,s.level,s.starts_at,s.ends_at,s.verified from slots s join responders r on r.id=s.responder_id where s.policy_id=$1 order by s.starts_at"
+      },
+      {
+        "title": "Handover notes",
+        "sql": "select name,owner,due_at,status,evidence from handovers where policy_id=$1 order by due_at"
+      }
+    ]
+  },
+  {
+    "name": "handover-record",
+    "title": "Handover record",
+    "for_each": "select id,name from handovers",
+    "file": "name",
+    "sections": [
+      {
+        "title": "Recorded handover",
+        "sql": "select code,name,owner,due_at,status,evidence from handovers where id=$1",
+        "layout": "record"
+      }
     ]
   }
 ]

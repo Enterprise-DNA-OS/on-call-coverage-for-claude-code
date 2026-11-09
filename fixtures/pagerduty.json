@@ -1,0 +1,28 @@
+{
+  "oncalls": [
+    {
+      "user": {
+        "id": "PU001",
+        "type": "user_reference",
+        "summary": "Taylor Example"
+      },
+      "schedule": {
+        "id": "PS001",
+        "type": "schedule_reference",
+        "summary": "Support rotation"
+      },
+      "escalation_policy": {
+        "id": "PE001",
+        "type": "escalation_policy_reference",
+        "summary": "Example support"
+      },
+      "escalation_level": 1,
+      "start": "2026-11-09T00:00:00Z",
+      "end": "2026-11-10T00:00:00Z"
+    }
+  ],
+  "limit": 25,
+  "offset": 0,
+  "more": false,
+  "total": null
+}

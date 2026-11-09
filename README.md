@@ -1,115 +1,78 @@
-<h1 align="center">On-call Coverage for Claude Code</h1>
+# On-call Coverage for Claude Code
 
-<p align="center">
-  <strong>The open-source on-call coverage system that is just a database and Claude Code.</strong>
-</p>
+Own the duty records behind the weekly on-call review. Responders, policies, assignments, coverage gaps and handovers live in one database. Keep your live paging service operating while you review and plan.
 
-<p align="center">
-  Created by <a href="https://www.enterprisedna.co"><strong>Enterprise DNA</strong></a>. Free and open source. Works with Claude Code, Codex, OpenCode or Cursor.
-</p>
+## Three ways to use it
 
-<!-- three-doors -->
-<table align="center">
-  <tr>
-    <td align="center"><strong>Do it yourself</strong><br/>Clone it, run it, own it. Free, MIT.<br/><a href="#quick-start">Quick start</a></td>
-    <td align="center"><strong>We customise it</strong><br/>Your fields, your rules, your PagerDuty data brought across.<br/><a href="https://enterprisedna.co/omni/book/?utm_source=github&utm_medium=readme&utm_campaign=pagerduty">Book a call</a></td>
-    <td align="center"><strong>We run it for you</strong><br/>Installed, connected and operated inside Omni. Setup fee, then a retainer.<br/><a href="https://enterprisedna.co/omni/instead-of/pagerduty?utm_source=github&utm_medium=readme&utm_campaign=pagerduty">How it works</a></td>
-  </tr>
-</table>
+- **Do it yourself:** free MIT source. Install it, import your prepared PagerDuty assignments and run the review.
+- **We customise it:** Enterprise DNA maps your records and adds your fields, rules, connections and shared screens. One setup fee, then a retainer for ongoing work.
+- **We run it for you:** installed, connected and operated through **Omni by Enterprise DNA**, for one setup fee then a retainer. [Talk to Sam](https://enterprisedna.co/omni/book?offer=replace-software&utm_campaign=pagerduty&utm_medium=readme).
 
-<p align="center">
-  <a href="#what-is-this">What is this</a> &bull;
-  <a href="#why-no-front-end">Why no front end</a> &bull;
-  <a href="#quick-start">Quick start</a> &bull;
-  <a href="#the-commands">Commands</a> &bull;
-  <a href="#instead-of-pagerduty">Instead of PagerDuty</a> &bull;
-  <a href="#want-it-installed-and-run-for-you">Installed for you</a> &bull;
-  <a href="#license">License</a>
-</p>
-
-<p align="center">
-  <img src="https://img.shields.io/badge/Node-20+-339933?style=flat-square" alt="Node 20+" />
-  <img src="https://img.shields.io/badge/PostgreSQL-any-336791?style=flat-square" alt="PostgreSQL" />
-  <img src="https://img.shields.io/badge/PGlite-embedded-3ecf8e?style=flat-square" alt="PGlite" />
-  <img src="https://img.shields.io/badge/License-MIT-yellow?style=flat-square" alt="MIT License" />
-</p>
-
----
-
-## What is this
-
-On-call Coverage for Claude Code does the job you pay PagerDuty for, as a Postgres database and a set of agent commands. There is no web front end. You open the folder in [Claude Code](https://claude.com/claude-code) (or Codex, OpenCode, Cursor: see `AGENTS.md`) and ask for what you want in plain language. It runs the right query, and it can answer questions the PagerDuty dashboard cannot.
-
-<!-- TODO(author): the annual bill. One sentence: what a 10 to 50 person business typically pays PagerDuty per year, all in, with a source. -->
-
-Want the same thing with a web front end, or built on a different stack? That is a customisation, and it is exactly what Enterprise DNA does: [book a call](https://enterprisedna.co/omni/book/?utm_source=github&utm_medium=readme&utm_campaign=pagerduty).
-
-<!-- TODO(author): two or three sentences on what this specific product covers and who it is for. -->
-
-## Why no front end
-
-- The front end was only ever there because the database was hard to talk to. That is no longer true.
-- Your data sits in plain Postgres tables you own. Any tool can read them. No export, no lock-in.
-- No seats, no tiers, no add-ons. Read [docs/why-no-front-end.md](docs/why-no-front-end.md) for the honest trade-offs too.
-
-## Quick start
-
-Sixty seconds, no database install (an embedded Postgres runs inside Node):
+## Start with synthetic records
 
 ```bash
-git clone https://github.com/Enterprise-DNA-OS/on-call-coverage-for-claude-code.git
-cd on-call-coverage-for-claude-code
 npm install
 npm run demo
+npm run oncall -- coverage
+npm run oncall -- workload
+npm run oncall -- compliance
+npm run view
+npm run docs
+npm test
 ```
 
-Then open the folder in Claude Code and type a slash command. <!-- TODO(author): name the first command to try. -->
+Node 20 or 22, Windows or Linux. PGlite runs locally with no database service. DATABASE_URL selects PostgreSQL. Claude Code, Codex, OpenCode or Cursor reads the same instructions and commands. Production setup and backup instructions: [operations](docs/operations.md).
 
-### Use it with your own Postgres or Supabase
+## The weekly jobs
 
-Copy `.env.example` to `.env`, set `DATABASE_URL`, then `npm run migrate`. Same commands, shared data, no per-seat fee.
+/coverage finds the exact gaps. /who-is-on checks handover boundaries. /conflicts finds concurrent duty. /workload unions assignment hours. /escalation-check shows the assigned people at each configured level, without sending anything. /weekly-review combines coverage, workload and attention. /draft-handover writes a private draft. /compliance applies [documented review rules](docs/compliance.md).
 
-## The commands
+Every read supports --json. All mutations require --actor. Codes match exactly; names match case-insensitively, and partial ids work. Ambiguity lists candidates and exits 1. Time inputs require a timezone, and output is UTC. End instants are exclusive. Run help for the full command list and read the matching .claude/commands file for flags.
 
-<!-- TODO(author): a table of the slash commands in .claude/commands and what each one does. -->
+## Bring your history
 
-| Command | What it does |
-|---|---|
-| `/...` | ... |
-
-## Instead of PagerDuty
-
-<!-- TODO(author): how to bring data across from PagerDuty; link docs/replace-pagerduty.md -->
-
-## Architecture
-
-```
-on-call-coverage-for-claude-code/
-  CLAUDE.md                 how the operator wants this run (routing table + house rules)
-  AGENTS.md                 the same, for Codex / OpenCode / Cursor / Gemini CLI
-  .claude/commands/         the slash commands
-  scripts/                  the CLI the commands drive
-  scripts/lib/db.mjs        one adapter: DATABASE_URL (pg) or embedded PGlite
-  supabase/migrations/      plain SQL schema
-  supabase/seed.sql         demo data
-  docs/                     the thesis and the migration guide
+```bash
+npm run oncall -- import pagerduty --file=fixtures/pagerduty.json --source=example-org --from=2026-11-09T00:00:00Z --to=2026-11-11T00:00:00Z --actor="Your name" --dry-run
 ```
 
-## Built for coding agents
+Use an authorised GET /oncalls JSON export with complete pagination metadata, then repeat without --dry-run. [Exact mapping, reconciliation and limits](docs/replace-pagerduty.md). No production credentials are needed to try the demo. The importer preserves original records and refuses changed duplicates. It does not create perpetual schedule rotations or import delivery configuration.
 
-The database, CLI and command recipes work with Claude Code, Codex, OpenCode or Cursor. Ask your coding agent for a new command and have it implement and test the change against the same records.
+## Ten questions your own review answers
 
-## Contributing
+1. Where are the uncovered intervals at each escalation level?
+2. Who is assigned at the exact handover boundary?
+3. Which responder has simultaneous duties across policies?
+4. How many unique on-call hours does each responder carry?
+5. Which imported assignments still need verification?
+6. Which policy has no named owner or an overdue review?
+7. Which handover is late and who owns it?
+8. Which responders have overdue retention reviews?
+9. What changed when an assignment was revised?
+10. How many records arrived in each import batch?
 
-Issues and pull requests are welcome. Keep the shape: plain SQL, a small CLI, a slash command per recurring job, no front end.
+These are supported queries, not claims that PagerDuty lacks them. Your own review dates, handover evidence and thresholds extend the questions you can ask.
 
-## Want it installed and run for you?
+## Documents in your name
 
-Enterprise DNA installs On-call Coverage for Claude Code for your business, migrates your PagerDuty data, connects it to the rest of your tools, and runs it for you as part of **Omni**, our managed Command Center. One setup fee, then a monthly retainer.
+Edit brand.json for your business name, colours and logo. npm run docs produces duty plans and handover records. npm run view produces weekly readiness, roster and open-handover snapshots. They are private, escaped HTML files with no write buttons. /new-view adds another read-only view.
 
-- Book a call: [enterprisedna.co/omni/book](https://enterprisedna.co/omni/book/?offer=replace-software&utm_source=github&utm_medium=readme&utm_campaign=pagerduty)
-- Read more: [enterprisedna.co/omni/instead-of/pagerduty](https://enterprisedna.co/omni/instead-of/pagerduty?utm_source=github&utm_medium=readme&utm_campaign=pagerduty)
+## Your first hour: ten things to ask for
 
-## License
+1. Put our name on the duty plan.
+2. Show the two-hour gap in the demo.
+3. Explain the exact handover boundary.
+4. Show who covers two policies at once.
+5. Count each person's overlapping duty once.
+6. Preview our exported assignments.
+7. Set our actual expected escalation levels.
+8. Set our local fatigue-review threshold.
+9. Draft the handover with unresolved actions.
+10. Add a tested region field and report with /customise.
 
-MIT. Copyright (c) 2026 Enterprise DNA.
+## Boundaries and proof
+
+This is an on-call planning and readiness database. No live alert ingestion, notification sending, mobile push, repeating rotation engine or public access is included. [Why there is no front end](docs/why-no-front-end.md). Coverage means assigned duty, not successful delivery. Duty hours are not actual working hours. Legal checks prompt review rather than certify compliance.
+
+npm test exercises every CLI command using an isolated database, with interval boundaries, duplicate-hour handling, empty policy gaps, partial export refusal, import rollback, idempotency, audit, validation and escaped documents. The manual CI workflow covers Windows and Linux plus PostgreSQL; a configured workflow is not proof of a completed run.
+
+[Research and selection evidence](docs/research.md). MIT. Not affiliated with PagerDuty or Anthropic. Hosting, agent usage and operation remain your costs.
